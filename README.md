@@ -1,2 +1,2 @@
-# psk31
+# PSK31
 ASCII to Varicode encoder
