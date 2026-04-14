@@ -11,7 +11,8 @@ static struct {
 } varicode;
 
 static inline void swap_bytes(uint16_t *word) {
-    *word = ((*word << 8) | (*word >> 8));
+    uint16_t value = *word;
+    *word = (value << 8) | (value >> 8);
 }
 
 // ( varicode [vacant] )
@@ -24,18 +25,16 @@ static inline void stream_vacant(uint16_t varicode_char, const uint16_t varicode
 
 // ( varicode [cramped] )
 static inline void stream_cramped(uint16_t varicode_char, const uint16_t varicode_bitCount) {
-    uint16_t shift = (varicode_bitCount - varicode.bitsFree);
-    varicode.buffer[varicode.index] |= (varicode_char >> shift);
+    uint16_t overflow = (varicode_bitCount - varicode.bitsFree);
+    varicode.buffer[varicode.index] |= (varicode_char >> overflow);
     // 'varicode.buffer[varicode.index]' is now full
 
     // Flip endianness for transmission, then address the next slot
     swap_bytes(&varicode.buffer[varicode.index]);
     ++varicode.index; // Maybe tell the compiler to PUSH 'word' into a stack?
 
-    shift = ((16 - varicode_bitCount) + varicode.bitsFree);
-    varicode.buffer[varicode.index] = (varicode_char << shift);
-
-    varicode.bitsFree = (shift - VARICODE_LETTER_GAP);
+    varicode.buffer[varicode.index] = (varicode_char << (16 - overflow));
+    varicode.bitsFree = 16 - overflow - VARICODE_LETTER_GAP;
 }
 
 //  o-- start --> ( varicode )

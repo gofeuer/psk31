@@ -10,12 +10,12 @@
 static int test_start() {
     int pass = 0;
 
-    uint16_t varicode_buffer[8];
-    memset(varicode_buffer, -1, sizeof(uint16_t) * 8); // A "dirty" buffer
+    uint16_t buffer[8];
+    memset(buffer, -1, sizeof(uint16_t) * 8); // A "dirty" buffer
 
     // Initializing just the first value is enough
-    encoder_start(varicode_buffer);
-    pass += !(varicode_buffer[0] == 0b0000000000000000);
+    encoder_start(buffer);
+    pass += !(buffer[0] == 0b0000000000000000);
     
     return pass;
 }
@@ -24,8 +24,8 @@ static int test_push() {
     int pass = 0;
 
     {
-        uint16_t varicode_buffer[8];
-        encoder_start(varicode_buffer);
+        uint16_t buffer[8];
+        encoder_start(buffer);
 
         encoder_push('H');
         encoder_push('e');
@@ -40,25 +40,25 @@ static int test_push() {
         encoder_push('d');
 
         // Big-endian
-        pass += !(varicode_buffer[0] == 0b1001100110101010);
-        pass += !(varicode_buffer[1] == 0b0110011110110011);
-        pass += !(varicode_buffer[2] == 0b0111010000100101);
-        pass += !(varicode_buffer[3] == 0b0100110111100101);
+        pass += !(buffer[0] == 0b1001100110101010);
+        pass += !(buffer[1] == 0b0110011110110011);
+        pass += !(buffer[2] == 0b0111010000100101);
+        pass += !(buffer[3] == 0b0100110111100101);
         // Little-endian 
-        pass += !(varicode_buffer[4] == 0b1001011010000000);
+        pass += !(buffer[4] == 0b1001011010000000);
     }
     {   // Test word break on character separator
-        uint16_t varicode_buffer[8];
-        encoder_start(varicode_buffer);
+        uint16_t buffer[8];
+        encoder_start(buffer);
 
         encoder_push('Z'); // 1010101101 00
         encoder_push('o'); // 111 00
         encoder_push('o'); // 111
 
         // Big-endian
-        pass += !(varicode_buffer[0] == 0b0100111010101011);
+        pass += !(buffer[0] == 0b0100111010101011);
         // Little-endian 
-        pass += !(varicode_buffer[1] == 0b0111000000000000);
+        pass += !(buffer[1] == 0b0111000000000000);
     }
 
     return pass;
@@ -66,8 +66,8 @@ static int test_push() {
 
 static int test_done() {
     int pass = 0;
-    uint16_t varicode_buffer[8];
-    encoder_start(varicode_buffer);
+    uint16_t buffer[8];
+    encoder_start(buffer);
 
     encoder_push('G'); // 11111101 00
     encoder_push('o'); // 111
