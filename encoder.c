@@ -60,8 +60,10 @@ void encoder_push(const uint8_t ascii_char) {
 }
 
 // ( varicode ) -- done -->o
-uint16_t encoder_done(void) {
-    // 'encoder_push(...)' doesn't flip the last address 
+uint16_t encoder_done(uint8_t **stream) {
+    // 'encoder_push(...)' doesn't flip the last buffered word.
     swap_bytes(&varicode.buffer[varicode.index]);
-    return varicode.index;
+
+    *stream = (uint8_t *)varicode.buffer;
+    return ((varicode.index + 1) * 2); // Return the length of the stream in bytes
 }

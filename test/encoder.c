@@ -72,11 +72,17 @@ static int test_done() {
     encoder_push('G'); // 11111101 00
     encoder_push('o'); // 111
 
-    uint16_t index = encoder_done();
+    uint8_t *stream;
+    uint16_t length = encoder_done(&stream);
 
     // Big-endian
-    pass += !(varicode_buffer[0] == 0b0011100011111101);
-    pass += !(index == 0);
+    pass += !(stream == (uint8_t *)buffer);
+    pass += !(length == 2);
+
+    pass += !(buffer[0] == 0b0011100011111101);
+
+    pass += !(stream[0] == 0b11111101);
+    pass += !(stream[1] == 0b00111000);
 
     return pass;
 }
