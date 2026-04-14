@@ -48,6 +48,8 @@ void encoder_start(uint16_t *buffer) {
 
 // ( varicode ) -- push --> ( varicode )
 void encoder_push(const uint8_t ascii_char) {
+    if (ascii_char > 127) return; // Invalid ASCII character, ignore it
+
     uint16_t varicode_bitCount = varicode_table[ascii_char][0];
     uint16_t varicode_char = varicode_table[ascii_char][1];
 
@@ -61,7 +63,7 @@ void encoder_push(const uint8_t ascii_char) {
 
 // ( varicode ) -- done -->o
 uint16_t encoder_done(uint8_t **stream) {
-    // 'encoder_push(...)' doesn't flip the last buffered word.
+    // 'encoder_push(...)' doesn't flip the last buffered word
     swap_bytes(&varicode.buffer[varicode.index]);
 
     *stream = (uint8_t *)varicode.buffer;
