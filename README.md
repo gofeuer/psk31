@@ -41,15 +41,6 @@ After `encoder_done` returns:
 - No dynamic allocation
 - Easy porting to embedded CPUs such as the 8086
 
-## Build and test
-
-A simple native build is available via the `Makefile` in the repository root. Example:
-
-```sh
-make
-./test/bin/encoder
-```
-
 This project is intended to become part of a broader 8086-targeted radio project. The current implementation is a portable C prototype.
 
 ## Notes
@@ -63,4 +54,3 @@ This project is intended to become part of a broader 8086-targeted radio project
 - Add 8086 cross-compilation instructions
 - Verify behavior on 8086 toolchains
 - Extend the encoder for full PSK31 framing and transmission
-

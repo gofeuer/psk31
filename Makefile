@@ -8,11 +8,14 @@ C_FLAGS = -std=gnu89 -O3 \
     -Wshadow
 DEBUG_FLAGS = -std=gnu89 -O0 -g
 
-test: clean
+debug: clean
 	$(CC) $(DEBUG_FLAGS) encoder.c test/encoder.c -o test/bin/encoder
 
 release: clean
 	$(CC) $(C_FLAGS) encoder.c test/encoder.c -o test/bin/encoder
+
+test: debug
+	./test/bin/encoder
 
 run: release
 	./test/bin/encoder
