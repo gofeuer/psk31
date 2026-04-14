@@ -10,13 +10,13 @@ static struct {
     int16_t bitsFree;
 } varicode;
 
-static inline void swap_bytes(uint16_t *word) {
+static void swap_bytes(uint16_t *word) {
     uint16_t value = *word;
     *word = (value << 8) | (value >> 8);
 }
 
 // ( varicode [vacant] )
-static inline void stream_vacant(uint16_t varicode_char, const uint16_t varicode_bitCount) {
+static void stream_vacant(uint16_t varicode_char, const uint16_t varicode_bitCount) {
     uint16_t shift = (varicode.bitsFree - varicode_bitCount);
     varicode.buffer[varicode.index] |= (varicode_char << shift);
 
@@ -24,7 +24,7 @@ static inline void stream_vacant(uint16_t varicode_char, const uint16_t varicode
 }
 
 // ( varicode [cramped] )
-static inline void stream_cramped(uint16_t varicode_char, const uint16_t varicode_bitCount) {
+static void stream_cramped(uint16_t varicode_char, const uint16_t varicode_bitCount) {
     uint16_t overflow = (varicode_bitCount - varicode.bitsFree);
     varicode.buffer[varicode.index] |= (varicode_char >> overflow);
     // 'varicode.buffer[varicode.index]' is now full
@@ -40,7 +40,7 @@ static inline void stream_cramped(uint16_t varicode_char, const uint16_t varicod
 //  o-- start --> ( varicode )
 void encoder_start(uint16_t *buffer) {
     varicode.buffer = buffer;
-    varicode.buffer[0] = 0b0000000000000000; // Initialized for the first 'push'
+    varicode.buffer[0] = 0; // Initialized for the first 'push'
 
     varicode.index = 0;
     varicode.bitsFree = 16;
@@ -48,10 +48,13 @@ void encoder_start(uint16_t *buffer) {
 
 // ( varicode ) -- push --> ( varicode )
 void encoder_push(const uint8_t ascii_char) {
+    uint16_t varicode_bitCount;
+    uint16_t varicode_char;
+    
     if (ascii_char > 127) return; // Invalid ASCII character, ignore it
 
-    uint16_t varicode_bitCount = varicode_table[ascii_char][0];
-    uint16_t varicode_char = varicode_table[ascii_char][1];
+    varicode_bitCount = varicode_table[ascii_char][0];
+    varicode_char = varicode_table[ascii_char][1];
 
     // Is there enough space for this varicode at the current buffer position?
     if (varicode.bitsFree < varicode_bitCount) {

@@ -7,7 +7,7 @@
 //     H        e       l        l       o     -        W         o       r        l        d
 // 101010101 00 11 00 11011 00 11011 00 111 00 1 00 101011101 00 111 00 10101 00 11011 00 101101
 
-static int test_start() {
+static int test_start(void) {
     int pass = 0;
 
     uint16_t buffer[8];
@@ -15,12 +15,12 @@ static int test_start() {
 
     // Initializing just the first value is enough
     encoder_start(buffer);
-    pass += !(buffer[0] == 0b0000000000000000);
+    pass += !(buffer[0] == 0); // 0000 0000:0000 0000
     
     return pass;
 }
 
-static int test_push() {
+static int test_push(void) {
     int pass = 0;
 
     {
@@ -40,12 +40,12 @@ static int test_push() {
         encoder_push('d');
 
         // Big-endian
-        pass += !(buffer[0] == 0b1001100110101010);
-        pass += !(buffer[1] == 0b0110011110110011);
-        pass += !(buffer[2] == 0b0111010000100101);
-        pass += !(buffer[3] == 0b0100110111100101);
+        pass += !(buffer[0] == 0x99AA); // 1001 1001:1010 1010
+        pass += !(buffer[1] == 0x67B3); // 0110 0111:1011 0011
+        pass += !(buffer[2] == 0x7425); // 0111 0100:0010 0101
+        pass += !(buffer[3] == 0x4DE5); // 0100 1101:1110 0101
         // Little-endian 
-        pass += !(buffer[4] == 0b1001011010000000);
+        pass += !(buffer[4] == 0x9680); // 1001 0110:1000 0000
     }
     {   // Test word break on character separator
         uint16_t buffer[8];
@@ -56,38 +56,40 @@ static int test_push() {
         encoder_push('o'); // 111
 
         // Big-endian
-        pass += !(buffer[0] == 0b0100111010101011);
+        pass += !(buffer[0] == 0x4EAB); // 0100 1110:1010 1011
         // Little-endian 
-        pass += !(buffer[1] == 0b0111000000000000);
+        pass += !(buffer[1] == 0x7000); // 0111 0000:0000 0000
     }
 
     return pass;
 }
 
-static int test_done() {
+static int test_done(void) {
     int pass = 0;
     uint16_t buffer[8];
+    uint8_t *stream;
+    uint16_t length;
+    
     encoder_start(buffer);
 
     encoder_push('G'); // 11111101 00
     encoder_push('o'); // 111
 
-    uint8_t *stream;
-    uint16_t length = encoder_done(&stream);
+    length = encoder_done(&stream);
 
     // Big-endian
     pass += !(stream == (uint8_t *)buffer);
     pass += !(length == 2);
 
-    pass += !(buffer[0] == 0b0011100011111101);
+    pass += !(buffer[0] == 0x38FD); // 0011 1000:1111 1101
 
-    pass += !(stream[0] == 0b11111101);
-    pass += !(stream[1] == 0b00111000);
+    pass += !(stream[0] == 0xFD); // 1111 1101
+    pass += !(stream[1] == 0x38); // 0011 1000
 
     return pass;
 }
 
-static int test_all() {
+static int test_all(void) {
     return 
         test_start() |
         test_push()  |
