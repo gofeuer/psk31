@@ -24,6 +24,7 @@ The implementation is specifically designed for low-powered and embedded process
 4. Call `encoder_done(&stream)` to finalize and obtain the byte stream.
 
 After `encoder_done` returns:
+
 - `stream` points to the same underlying bytes as the `uint16_t` buffer.
 - The return value is the stream length in bytes.
 
