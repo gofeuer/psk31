@@ -48,8 +48,7 @@ void encoder_start(uint16_t *buffer) {
 
 // ( varicode ) -- push --> ( varicode )
 void encoder_push(const uint8_t ascii_char) {
-    uint16_t varicode_bitCount;
-    uint16_t varicode_char;
+    uint16_t varicode_bitCount, varicode_char;
     
     if (ascii_char > 127) return; // Invalid ASCII character, ignore it
 
