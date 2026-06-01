@@ -2,6 +2,7 @@ CC = gcc
 C_FLAGS = -std=c99 -O3 \
 	-pedantic-errors \
     -Wall -Wextra -Werror \
+	-Wno-char-subscripts \
 	-Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition \
 	-Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type \
     -Wshadow
@@ -9,6 +10,7 @@ DEBUG_FLAGS = -std=c99 -O0 -g
 FUZZ_FLAGS = -std=c99 -O1 -g -fsanitize=address,undefined \
 	-pedantic-errors \
     -Wall -Wextra -Werror \
+	-Wno-char-subscripts \
 	-Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition \
 	-Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type \
     -Wshadow

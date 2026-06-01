@@ -12,20 +12,20 @@ static inline void swap_bytes(unsigned short *word) {
 }
 
 // ( vacant )
-static void vacant_push(int varicode_bit_count, unsigned short varicode_bits) {
-    encoder.buffer[encoder.index] |= varicode_bits << (encoder.bits_free - varicode_bit_count);
-    encoder.bits_free -= varicode_bit_count + VARICODE_LETTER_GAP;
+static void vacant_push(varicode varicode) {
+    encoder.buffer[encoder.index] |= varicode.encoded_bits << (encoder.bits_free - varicode.bit_count);
+    encoder.bits_free -= varicode.bit_count + VARICODE_LETTER_GAP;
 }
 
 // ( cramped )
-static void cramped_push(int varicode_bit_count, unsigned short varicode_bits) {
-    int overflow = varicode_bit_count - encoder.bits_free;
+static void cramped_push(varicode varicode) {
+    int overflow = varicode.bit_count - encoder.bits_free;
     
-    encoder.buffer[encoder.index] |= varicode_bits >> overflow;
+    encoder.buffer[encoder.index] |= varicode.encoded_bits >> overflow;
     swap_bytes(&encoder.buffer[encoder.index]); // Flip endianness for transmission.
-    encoder.buffer[++encoder.index] = varicode_bits << (16 - overflow); // Write the overflowed bits to the next index.
+    encoder.buffer[++encoder.index] = varicode.encoded_bits << (16 - overflow); // Write the overflowed bits to the next index.
 
-    // Keep track of how much space is left in this new 'varicode.buffer[varicode.index]'
+    // Keep track of how much space is left in this new 'encoder.buffer[encoder.index]'
     encoder.bits_free = (16 - overflow) - VARICODE_LETTER_GAP;
 }
 
@@ -41,12 +41,12 @@ void encoder_start(unsigned char *buffer) {
 void encoder_push(char ascii) {
     if ((unsigned char)ascii > 127) return; // Invalid ASCII character, ignore it.
 
-    varicode code = varicode_table[(unsigned char)ascii];
+    varicode varicode = varicode_table[ascii];
 
-    if (encoder.bits_free < code.bit_count) { // Is there enough space at the current buffer position?
-        cramped_push(code.bit_count, code.encoded_bits); // No.
+    if (encoder.bits_free < varicode.bit_count) { // Is there enough space at the current buffer position?
+        cramped_push(varicode); // No.
     } else {
-        vacant_push(code.bit_count, code.encoded_bits);  // Yes.
+        vacant_push(varicode);  // Yes.
     }
 }
 
