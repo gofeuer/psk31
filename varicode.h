@@ -1,9 +1,14 @@
 #ifndef VARICODE_H
 #define VARICODE_H
-#include <stdint.h>
 
-// { bit_count, encoded_bits }
-const uint16_t varicode_table[128][2] = { 
+#define VARICODE_LETTER_GAP 2 // 00
+
+typedef struct {
+    int bit_count;
+    unsigned short encoded_bits;
+} varicode;
+
+static const varicode varicode_table[128] = { 
     { 10, 0x2AB }, // 1010101011 NUL (Null character)
     { 10, 0x2DB }, // 1011011011 SOH (Start of Heading)
     { 10, 0x2ED }, // 1011101101 STX (Start of Text)
@@ -136,5 +141,156 @@ const uint16_t varicode_table[128][2] = {
     { 10, 0x2D7 }, // 1011010111 '~'
     { 10, 0x3B5 }, // 1110110101 DEL (Delete)
 };
+
+typedef struct {
+    unsigned short varicode;
+    char ascii;
+} varicode_ascii;
+
+// Packed reverse lookup table: Varicode value to ASCII character.
+static const varicode_ascii ascii_table_packed[128] = {
+    {   0x1,  ' ' }, //          1 ' '
+    
+    {   0x3,  'e' }, //         11 'e'
+
+    {   0x5,  't' }, //        101 't'
+    {   0x7,  'o' }, //        111 'o'
+
+    {   0xB,  'a' }, //       1011 'a'
+    {   0xD,  'i' }, //       1101 'i'
+    {   0xF,  'n' }, //       1111 'n'
+    
+    {  0x15,  'r' }, //      10101 'r'
+    {  0x17,  's' }, //      10111 's'
+    {  0x1B,  'l' }, //      11011 'l'
+    {  0x1D, '\n' }, //      11101 LF  (Line Feed / New Line)
+    {  0x1F, '\r' }, //      11111 CR  (Carriage Return)
+    
+    {  0x2B,  'h' }, //     101011 'h'
+    {  0x2D,  'd' }, //     101101 'd'
+    {  0x2F,  'c' }, //     101111 'c'
+    {  0x35,  '-' }, //     110101 '-'
+    {  0x37,  'u' }, //     110111 'u'
+    {  0x3B,  'm' }, //     111011 'm'
+    {  0x3D,  'f' }, //     111101 'f'
+    {  0x3F,  'p' }, //     111111 'p'
+
+    {  0x55,  '=' }, //    1010101 '='
+    {  0x57,  '.' }, //    1010111 '.'
+    {  0x5B,  'g' }, //    1011011 'g'
+    {  0x5D,  'y' }, //    1011101 'y'
+    {  0x5F,  'b' }, //    1011111 'b'
+    {  0x6B,  'w' }, //    1101011 'w'
+    {  0x6D,  'T' }, //    1101101 'T'
+    {  0x6F,  'S' }, //    1101111 'S'
+    {  0x75,  ',' }, //    1110101 ','
+    {  0x77,  'E' }, //    1110111 'E'
+    {  0x7B,  'v' }, //    1111011 'v'
+    {  0x7D,  'A' }, //    1111101 'A'
+    {  0x7F,  'I' }, //    1111111 'I'
+    
+    {  0xAB,  'O' }, //   10101011 'O'
+    {  0xAD,  'C' }, //   10101101 'C'
+    {  0xAF,  'R' }, //   10101111 'R'
+    {  0xB5,  'D' }, //   10110101 'D'
+    {  0xB7,  '0' }, //   10110111 '0'
+    {  0xBB,  'M' }, //   10111011 'M'
+    {  0xBD,  '1' }, //   10111101 '1'
+    {  0xBF,  'k' }, //   10111111 'k'
+    {  0xD5,  'P' }, //   11010101 'P'
+    {  0xD7,  'L' }, //   11010111 'L'
+    {  0xDB,  'F' }, //   11011011 'F'
+    {  0xDD,  'N' }, //   11011101 'N'
+    {  0xDF,  'x' }, //   11011111 'x'
+    {  0xEB,  'B' }, //   11101011 'B'
+    {  0xED,  '2' }, //   11101101 '2'
+    {  0xEF, '\t' }, //   11101111 HT  (Horizontal Tab)
+    {  0xF5,  ':' }, //   11110101 ':'
+    {  0xF7,  ')' }, //   11110111 ')'
+    {  0xFB,  '(' }, //   11111011 '('
+    {  0xFD,  'G' }, //   11111101 'G'
+    {  0xFF,  '3' }, //   11111111 '3'
+    
+    { 0x155,  'H' }, //  101010101 'H'
+    { 0x157,  'U' }, //  101010111 'U'
+    { 0x15B,  '5' }, //  101011011 '5'
+    { 0x15D,  'W' }, //  101011101 'W'
+    { 0x15F,  '"' }, //  101011111 '"'
+    { 0x16B,  '6' }, //  101101011 '6'
+    { 0x16D,  '_' }, //  101101101 '_'
+    { 0x16F,  '*' }, //  101101111 '*'
+    { 0x175,  'X' }, //  101110101 'X'
+    { 0x177,  '4' }, //  101110111 '4'
+    { 0x17B,  'Y' }, //  101111011 'Y'
+    { 0x17D,  'K' }, //  101111101 'K'
+    { 0x17F, '\'' }, //  101111111 '''
+    { 0x1AB,  '8' }, //  110101011 '8'
+    { 0x1AD,  '7' }, //  110101101 '7'
+    { 0x1AF,  '/' }, //  110101111 '/'
+    { 0x1B5,  'V' }, //  110110101 'V'
+    { 0x1B7,  '9' }, //  110110111 '9'
+    { 0x1BB,  '|' }, //  110111011 '|'
+    { 0x1BD,  ';' }, //  110111101 ';'
+    { 0x1BF,  'q' }, //  110111111 'q'
+    { 0x1D5,  'z' }, //  111010101 'z'
+    { 0x1D7,  '>' }, //  111010111 '>'
+    { 0x1DB,  '$' }, //  111011011 '$'
+    { 0x1DD,  'Q' }, //  111011101 'Q'
+    { 0x1DF,  '+' }, //  111011111 '+'
+    { 0x1EB,  'j' }, //  111101011 'j'
+    { 0x1ED,  '<' }, //  111101101 '<'
+    { 0x1EF, '\\' }, //  111101111 '\'
+    { 0x1F5,  '#' }, //  111110101 '#'
+    { 0x1F7,  '[' }, //  111110111 '['
+    { 0x1FB,  ']' }, //  111111011 ']'
+    { 0x1FD,  'J' }, //  111111101 'J'
+    { 0x1FF,  '!' }, //  111111111 '!'
+    
+    { 0x2AB, '\0' }, // 1010101011 NUL (Null character)
+    { 0x2AD,  'Z' }, // 1010101101 'Z'
+    { 0x2AF,  '?' }, // 1010101111 '?'
+    { 0x2B5,  '}' }, // 1010110101 '}'
+    { 0x2B7,  '{' }, // 1010110111 '{'
+    { 0x2BB,  '&' }, // 1010111011 '&'
+    { 0x2BD,  '@' }, // 1010111101 '@'
+    { 0x2BF,  '^' }, // 1010111111 '^'
+    { 0x2D5,  '%' }, // 1011010101 '%'
+    { 0x2D7,  '~' }, // 1011010111 '~'
+    { 0x2DB, 0x01 }, // 1011011011 SOH (Start of Heading)
+    { 0x2DD, 0x0C }, // 1011011101 FF  (Form Feed / Page Break)
+    { 0x2DF,  '`' }, // 1011011111 '`'
+    { 0x2EB, 0x04 }, // 1011101011 EOT (End of Transmission)
+    { 0x2ED, 0x02 }, // 1011101101 STX (Start of Text)
+    { 0x2EF, 0x06 }, // 1011101111 ACK (Acknowledge)
+    { 0x2F5, 0x11 }, // 1011110101 DC1 (Device Control 1 / XON)
+    { 0x2F7, 0x10 }, // 1011110111 DLE (Data Link Escape)
+    { 0x2FB, 0x1E }, // 1011111011 RS  (Record Separator)
+    { 0x2FD, 0x07 }, // 1011111101 BEL (Bell / Alert)
+    { 0x2FF, 0x08 }, // 1011111111 BS  (Backspace)
+    { 0x355, 0x1B }, // 1101010101 ESC (Escape)
+    { 0x357, 0x17 }, // 1101010111 ETB (End of Transmission Block)
+    { 0x35B, 0x14 }, // 1101011011 DC4 (Device Control 4)
+    { 0x35D, 0x1C }, // 1101011101 FS  (File Separator)
+    { 0x35F, 0x05 }, // 1101011111 ENQ (Enquiry)
+    { 0x36B, 0x15 }, // 1101101011 NAK (Negative Acknowledge)
+    { 0x36D, 0x16 }, // 1101101101 SYN (Synchronous Idle)
+    { 0x36F, 0x0B }, // 1101101111 VT  (Vertical Tab)
+    { 0x375, 0x0E }, // 1101110101 SO  (Shift Out)
+    { 0x377, 0x03 }, // 1101110111 ETX (End of Text)
+    { 0x37B, 0x18 }, // 1101111011 CAN (Cancel)
+    { 0x37D, 0x19 }, // 1101111101 EM  (End of Medium)
+    { 0x37F, 0x1F }, // 1101111111 US  (Unit Separator)
+    { 0x3AB, 0x0F }, // 1110101011 SI  (Shift In)
+    { 0x3AD, 0x12 }, // 1110101101 DC2 (Device Control 2)
+    { 0x3AF, 0x13 }, // 1110101111 DC3 (Device Control 3 / XOFF)
+    { 0x3B5, 0x7F }, // 1110110101 DEL (Delete)
+    { 0x3BB, 0x1D }, // 1110111011 GS  (Group Separator)
+    { 0x3D7, 0x1A }, // 1110110111 SUB (Substitute)
+};
+
+#define LARGEST_VALID_VARICODE 0x3D7 // 1110110111 SUB (Substitute)
+
+// Sparse reverse lookup table: Varicode index to ASCII character.
+static char ascii_table[LARGEST_VALID_VARICODE + 1];
 
 #endif // VARICODE_H

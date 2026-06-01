@@ -1,56 +1,50 @@
-# PSK31 Encoder
+# PSK31 Codec
 
-A compact, embedded-friendly ASCII-to-Varicode encoder for PSK31.
+A compact, embedded-friendly ASCII-to-Varicode encoder and decoder for PSK31.
 
 ## Overview
 
-PSK31 is a digital mode used by amateur radio operators. This repository contains a small C encoder that converts ASCII characters into Varicode bit patterns suitable for PSK31-style transmission.
-
-The implementation is specifically designed for low-powered and embedded processors. It avoids dynamic memory allocation and operates on a fixed `uint16_t` buffer supplied by the caller.
-
-## Features
-
-- ASCII to Varicode encoding
-- No heap allocation
-- Fixed-size, caller-provided buffer
-- Portable C implementation
-- Simple encoder API
+PSK31 is a digital mode used by amateur radio operators. This library encodes ASCII text into Varicode bit sequences and decodes them back. The implementation is designed for low-powered and embedded processors with no dynamic memory allocation.
 
 ## Usage
 
-1. Allocate a `uint16_t` buffer in the caller.
-2. Call `encoder_start(buffer)` to initialize encoding.
-3. Call `encoder_push(c)` for each ASCII character.
-4. Call `encoder_done(&stream)` to finalize and obtain the byte stream.
+**Encoding:** Convert ASCII to Varicode bit sequences. Each character becomes a variable-length sequence of 1s and 0s, terminated by at least two consecutive 0s.
 
-After `encoder_done` returns:
+```c
+unsigned char buffer[16];
+encoder_start(buffer);
+encoder_push('H');
+encoder_push('i');
+int bytes = encoder_done();
+// buffer contains encoded bits, bytes indicates length
+```
 
-- `stream` points to the same underlying bytes as the `uint16_t` buffer.
-- The return value is the stream length in bytes.
+**Decoding:** Reverse the process by accumulating bits until the character separator (two consecutive 0s) is detected, then emit the character.
+
+```c
+void on_char(char c) {
+    printf("%c", c);
+}
+
+decoder_init(on_char);
+decoder_push(encoded_byte_1);
+decoder_push(encoded_byte_2);
+// on_char() called for each decoded character
+```
+
+The decoder maintains state: the current Varicode value being assembled and a count of consecutive zeros. When `zero_count >= 2`, the accumulated value is looked up in the Varicode table and emitted via callback.
 
 ## Repository layout
 
 - `encoder.c` — encoder implementation
-- `psk31.h` — public encoder API
-- `varicode.h` — Varicode lookup table
-- `test/encoder.c` — encoder tests for start/push/done behavior
+- `decoder.c` — decoder implementation
+- `psk31.h` — public API
+- `varicode.h` — Varicode lookup tables
+- `test/` — encoder and decoder tests
 
-## Design goals
+## Design
 
-- Minimal memory overhead
-- No dynamic allocation
-- Easy porting to embedded CPUs such as the 8086
-
-This project is intended to become part of a broader 8086-targeted radio project. The current implementation is a portable C prototype.
-
-## Notes
-
-- The caller must provide a buffer large enough for the encoded message.
-- `encoder_done` returns the number of bytes in the encoded stream.
-- The encoded output uses the same memory buffer as the input, exposed as `uint8_t *`.
-
-## Roadmap
-
-- Add 8086 cross-compilation instructions
-- Verify behavior on 8086 toolchains
-- Extend the encoder for full PSK31 framing and transmission
+- No dynamic memory allocation
+- Caller-provided buffers
+- Portable C implementation
+- Callback-based decoder for streaming processing

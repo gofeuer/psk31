@@ -1,73 +1,57 @@
 #include "psk31.h"
 #include "varicode.h"
-#include <stdint.h>
-
-#define VARICODE_LETTER_GAP 2 // 00
 
 static struct {
-    uint16_t *buffer;
-    uint16_t index;
-    int16_t bitsFree;
-} varicode;
+    unsigned short *buffer;
+    int index;
+    int bits_free;
+} encoder;
 
-static void swap_bytes(uint16_t *word) {
-    uint16_t value = *word;
-    *word = (value << 8) | (value >> 8);
+static inline void swap_bytes(unsigned short *word) {
+    *word = (*word << 8) | (*word >> 8);
 }
 
-// ( varicode [vacant] )
-static void stream_vacant(uint16_t varicode_char, const uint16_t varicode_bitCount) {
-    uint16_t shift = (varicode.bitsFree - varicode_bitCount);
-    varicode.buffer[varicode.index] |= (varicode_char << shift);
-
-    varicode.bitsFree -= (varicode_bitCount + VARICODE_LETTER_GAP);
+// ( vacant )
+static void vacant_push(int varicode_bit_count, unsigned short varicode_bits) {
+    encoder.buffer[encoder.index] |= varicode_bits << (encoder.bits_free - varicode_bit_count);
+    encoder.bits_free -= varicode_bit_count + VARICODE_LETTER_GAP;
 }
 
-// ( varicode [cramped] )
-static void stream_cramped(uint16_t varicode_char, const uint16_t varicode_bitCount) {
-    uint16_t overflow = (varicode_bitCount - varicode.bitsFree);
-    varicode.buffer[varicode.index] |= (varicode_char >> overflow);
-    // 'varicode.buffer[varicode.index]' is now full
-
-    // Flip endianness for transmission, then address the next slot
-    swap_bytes(&varicode.buffer[varicode.index]);
-    ++varicode.index; // Maybe tell the compiler to PUSH 'word' into a stack?
-
-    varicode.buffer[varicode.index] = (varicode_char << (16 - overflow));
-    varicode.bitsFree = 16 - overflow - VARICODE_LETTER_GAP;
-}
-
-//  o-- start --> ( varicode )
-void encoder_start(uint16_t *buffer) {
-    varicode.buffer = buffer;
-    varicode.buffer[0] = 0; // Initialized for the first 'push'
-
-    varicode.index = 0;
-    varicode.bitsFree = 16;
-}
-
-// ( varicode ) -- push --> ( varicode )
-void encoder_push(const uint8_t ascii_char) {
-    uint16_t varicode_bitCount, varicode_char;
+// ( cramped )
+static void cramped_push(int varicode_bit_count, unsigned short varicode_bits) {
+    int overflow = varicode_bit_count - encoder.bits_free;
     
-    if (ascii_char > 127) return; // Invalid ASCII character, ignore it
+    encoder.buffer[encoder.index] |= varicode_bits >> overflow;
+    swap_bytes(&encoder.buffer[encoder.index]); // Flip endianness for transmission.
+    encoder.buffer[++encoder.index] = varicode_bits << (16 - overflow); // Write the overflowed bits to the next index.
 
-    varicode_bitCount = varicode_table[ascii_char][0];
-    varicode_char = varicode_table[ascii_char][1];
+    // Keep track of how much space is left in this new 'varicode.buffer[varicode.index]'
+    encoder.bits_free = (16 - overflow) - VARICODE_LETTER_GAP;
+}
 
-    // Is there enough space for this varicode at the current buffer position?
-    if (varicode.bitsFree < varicode_bitCount) {
-        stream_cramped(varicode_char, varicode_bitCount); // No
+//  o-- start --> ( vacant )
+void encoder_start(unsigned char *buffer) {
+    encoder.buffer = (unsigned short *)buffer;
+    encoder.buffer[0] = 0; // Initialized for the first 'push' event.
+    encoder.bits_free = 16; // All bits of the first position are free.
+    encoder.index = 0;
+}
+
+// ( vacant|cramped ) -- push --> ( vacant|cramped )
+void encoder_push(char ascii) {
+    if ((unsigned char)ascii > 127) return; // Invalid ASCII character, ignore it.
+
+    varicode code = varicode_table[(unsigned char)ascii];
+
+    if (encoder.bits_free < code.bit_count) { // Is there enough space at the current buffer position?
+        cramped_push(code.bit_count, code.encoded_bits); // No.
     } else {
-        stream_vacant(varicode_char, varicode_bitCount);  // Yes
+        vacant_push(code.bit_count, code.encoded_bits);  // Yes.
     }
 }
 
-// ( varicode ) -- done -->o
-uint16_t encoder_done(uint8_t **stream) {
-    // 'encoder_push(...)' doesn't flip the last buffered word
-    swap_bytes(&varicode.buffer[varicode.index]);
-
-    *stream = (uint8_t *)varicode.buffer;
-    return ((varicode.index + 1) * 2); // Return the length of the stream in bytes
+// ( vacant|cramped ) -- done -->o
+int encoder_done(void) {
+    swap_bytes(&encoder.buffer[encoder.index]); // Flip the last encoded word.
+    return (encoder.index + 1) * 2; // Return the length of the stream in bytes.
 }
