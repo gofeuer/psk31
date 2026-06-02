@@ -19,7 +19,7 @@ static void test_callback(char ascii) {
 }
 
 // Test: Single character decoding using encoder
-void test_single_char_space(void) {
+static void test_single_char_space(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -37,7 +37,7 @@ void test_single_char_space(void) {
 }
 
 // Test: Character 'e' (most common in English)
-void test_single_char_e(void) {
+static void test_single_char_e(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -55,7 +55,7 @@ void test_single_char_e(void) {
 }
 
 // Test: Character 'a' (4 bits)
-void test_single_char_a(void) {
+static void test_single_char_a(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -73,7 +73,7 @@ void test_single_char_a(void) {
 }
 
 // Test: Multiple characters in sequence
-void test_multiple_chars(void) {
+static void test_multiple_chars(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -93,7 +93,7 @@ void test_multiple_chars(void) {
 }
 
 // Test: String "hello"
-void test_string_hello(void) {
+static void test_string_hello(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -118,7 +118,7 @@ void test_string_hello(void) {
 }
 
 // Test: Digits
-void test_digits(void) {
+static void test_digits(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -141,7 +141,7 @@ void test_digits(void) {
 }
 
 // Test: Special characters
-void test_special_chars(void) {
+static void test_special_chars(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -163,7 +163,7 @@ void test_special_chars(void) {
 }
 
 // Test: Line feed and carriage return
-void test_line_feed_cr(void) {
+static void test_line_feed_cr(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -191,7 +191,7 @@ void test_line_feed_cr(void) {
 }
 
 // Test: Mixed case letters
-void test_mixed_case(void) {
+static void test_mixed_case(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -216,7 +216,7 @@ void test_mixed_case(void) {
 }
 
 // Test: Initialization doesn't affect previous state
-void test_reinit(void) {
+static void test_reinit(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -251,7 +251,7 @@ void test_reinit(void) {
 }
 
 // Test: Long string
-void test_long_string(void) {
+static void test_long_string(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     
@@ -269,12 +269,12 @@ void test_long_string(void) {
         decoder_push(encoded_buffer[i]);
     }
     
-    ASSERT(test_state.decoded_count == strlen(test_string), "All characters should be decoded");
+    ASSERT((size_t)test_state.decoded_count == strlen(test_string), "All characters should be decoded");
     ASSERT(strcmp(test_state.decoded, test_string) == 0, "Decoded string should match original");
 }
 
 // Test: Tab character
-void test_tab_character(void) {
+static void test_tab_character(void) {
     test_state.decoded_count = 0;
     decoder_init(test_callback);
     

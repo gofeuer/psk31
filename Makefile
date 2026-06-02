@@ -1,19 +1,14 @@
 CC = gcc
-C_FLAGS = -std=c99 -O3 \
+WARN_FLAGS = \
 	-pedantic-errors \
     -Wall -Wextra -Werror \
 	-Wno-char-subscripts \
 	-Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition \
 	-Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type \
     -Wshadow
-DEBUG_FLAGS = -std=c99 -O0 -g
-FUZZ_FLAGS = -std=c99 -O1 -g -fsanitize=address,undefined \
-	-pedantic-errors \
-    -Wall -Wextra -Werror \
-	-Wno-char-subscripts \
-	-Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition \
-	-Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type \
-    -Wshadow
+C_FLAGS = -std=c99 -O3 $(WARN_FLAGS)
+DEBUG_FLAGS = -std=c99 -O0 -g $(WARN_FLAGS)
+FUZZ_FLAGS = -std=c99 -O3 -g -fsanitize=address,undefined $(WARN_FLAGS)
 
 debug: clean
 	$(CC) $(DEBUG_FLAGS) encoder.c test/encoder.c -o test/bin/encoder

@@ -8,7 +8,7 @@
 // 101010101 00 11 00 11011 00 11011 00 111 00 1 00 101011101 00 111 00 10101 00 11011 00 101101
 
 // Test: Encoder initialization
-void test_encoder_init(void) {
+static void test_encoder_init(void) {
     unsigned short buffer[8];
     memset(buffer, 0xFF, sizeof(buffer)); // "Dirty" buffer
     
@@ -18,7 +18,7 @@ void test_encoder_init(void) {
 }
 
 // Test: Single character encoding
-void test_single_char_space(void) {
+static void test_single_char_space(void) {
     unsigned short buffer[8];
     encoder_start((unsigned char*)buffer);
     
@@ -29,7 +29,7 @@ void test_single_char_space(void) {
 }
 
 // Test: Single character 'e' (shortest encoding)
-void test_single_char_e(void) {
+static void test_single_char_e(void) {
     unsigned short buffer[8];
     encoder_start((unsigned char*)buffer);
     
@@ -40,7 +40,7 @@ void test_single_char_e(void) {
 }
 
 // Test: Single character 'a'
-void test_single_char_a(void) {
+static void test_single_char_a(void) {
     unsigned short buffer[8];
     encoder_start((unsigned char*)buffer);
     
@@ -51,7 +51,7 @@ void test_single_char_a(void) {
 }
 
 // Test: Multiple characters
-void test_multiple_chars(void) {
+static void test_multiple_chars(void) {
     unsigned short buffer[8];
     encoder_start((unsigned char*)buffer);
     
@@ -63,7 +63,7 @@ void test_multiple_chars(void) {
 }
 
 // Test: String "hello"
-void test_string_hello(void) {
+static void test_string_hello(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -79,7 +79,7 @@ void test_string_hello(void) {
 }
 
 // Test: Digits
-void test_digits(void) {
+static void test_digits(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -93,7 +93,7 @@ void test_digits(void) {
 }
 
 // Test: Special characters
-void test_special_chars(void) {
+static void test_special_chars(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -106,7 +106,7 @@ void test_special_chars(void) {
 }
 
 // Test: Line feed and carriage return
-void test_line_feed_cr(void) {
+static void test_line_feed_cr(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -121,7 +121,7 @@ void test_line_feed_cr(void) {
 }
 
 // Test: Mixed case letters
-void test_mixed_case(void) {
+static void test_mixed_case(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -135,7 +135,7 @@ void test_mixed_case(void) {
 }
 
 // Test: Long string
-void test_long_string(void) {
+static void test_long_string(void) {
     unsigned short buffer[128];
     encoder_start((unsigned char*)buffer);
     
@@ -150,7 +150,7 @@ void test_long_string(void) {
 }
 
 // Test: Tab character
-void test_tab_character(void) {
+static void test_tab_character(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -163,7 +163,7 @@ void test_tab_character(void) {
 }
 
 // Test: Invalid ASCII (>127) should be ignored
-void test_invalid_ascii(void) {
+static void test_invalid_ascii(void) {
     unsigned short buffer[16];
     encoder_start((unsigned char*)buffer);
     
@@ -176,7 +176,7 @@ void test_invalid_ascii(void) {
 }
 
 // Test: Encoder done returns byte count
-void test_encoder_done_returns_bytes(void) {
+static void test_encoder_done_returns_bytes(void) {
     unsigned short buffer[8];
     encoder_start((unsigned char*)buffer);
     
