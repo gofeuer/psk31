@@ -8,6 +8,7 @@ typedef struct {
     unsigned short encoded_bits;
 } varicode;
 
+#ifdef PSK31_ENCODER
 static const varicode varicode_table[128] = { 
     { 10, 0x2AB }, // 1010101011 NUL (Null character)
     { 10, 0x2DB }, // 1011011011 SOH (Start of Heading)
@@ -77,7 +78,7 @@ static const varicode varicode_table[128] = {
 
     { 10, 0x2BD }, // 1010111101 '@'
     {  7,  0x7D }, //    1111101 'A'
-    {  8,  0xEB  }, //   11101011 'B'
+    {  8,  0xEB }, //   11101011 'B'
     {  8,  0xAD }, //   10101101 'C'
     {  8,  0xB5 }, //   10110101 'D'
     {  7,  0x77 }, //    1110111 'E'
@@ -112,7 +113,7 @@ static const varicode varicode_table[128] = {
     {  4,   0xB }, //       1011 'a'
     {  7,  0x5F }, //    1011111 'b'
     {  6,  0x2F }, //     101111 'c'
-    {  6,  0x2B }, //     101101 'd'
+    {  6,  0x2D }, //     101101 'd'
     {  2,   0x3 }, //         11 'e'
     {  6,  0x3D }, //     111101 'f'
     {  7,  0x5B }, //    1011011 'g'
@@ -141,12 +142,14 @@ static const varicode varicode_table[128] = {
     { 10, 0x2D7 }, // 1011010111 '~'
     { 10, 0x3B5 }, // 1110110101 DEL (Delete)
 };
+#endif
 
 typedef struct {
     unsigned short varicode;
     char ascii;
 } varicode_ascii;
 
+#ifdef PSK31_DECODER
 // Packed reverse lookup table: Varicode value to ASCII character.
 static const varicode_ascii ascii_table_packed[128] = {
     {   0x1,  ' ' }, //          1 ' '
@@ -287,10 +290,8 @@ static const varicode_ascii ascii_table_packed[128] = {
     { 0x3BB, 0x1D }, // 1110111011 GS  (Group Separator)
     { 0x3D7, 0x1A }, // 1110110111 SUB (Substitute)
 };
+#endif
 
 #define LARGEST_VALID_VARICODE 0x3D7 // 1110110111 SUB (Substitute)
-
-// Sparse reverse lookup table: Varicode index to ASCII character.
-static char ascii_table[LARGEST_VALID_VARICODE + 1];
 
 #endif // VARICODE_H

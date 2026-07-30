@@ -1,3 +1,4 @@
+#define PSK31_ENCODER
 #include "psk31.h"
 #include "varicode.h"
 
