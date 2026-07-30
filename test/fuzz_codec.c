@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
     roundtrip_cases = parse_count((argc > 2) ? argv[2] : NULL, DEFAULT_ROUNDTRIP_CASES);
     mixed_corruption_cases = parse_count((argc > 3) ? argv[3] : NULL, DEFAULT_MIXED_CORRUPTION_CASES);
 
-    printf("PSK31 Decoder Fuzzer\n");
+    printf("PSK31 Codec Fuzzer\n");
     printf("Running %u random streams, %u round trips, %u mixed corruption cases...\n\n",
            random_stream_cases, roundtrip_cases, mixed_corruption_cases);
 

@@ -1,28 +1,29 @@
 #include "psk31.h"
+#define PSK31_VARICODE_TABLE
 #include "varicode.h"
 
 static struct {
     unsigned short *buffer;
-    int index;
-    int bits_free;
+    unsigned int index;
+    signed char bits_free;
 } encoder;
 
-static inline void swap_bytes(unsigned short *word) {
-    *word = (*word << 8) | (*word >> 8);
+static inline unsigned short swap_bytes(unsigned short val) {
+    return (val << 8) | (val >> 8);
 }
 
 // ( vacant )
-static void vacant_push(varicode varicode) {
+static inline void vacant_push(varicode varicode) {
     encoder.buffer[encoder.index] |= varicode.encoded_bits << (encoder.bits_free - varicode.bit_count);
     encoder.bits_free -= varicode.bit_count + VARICODE_LETTER_GAP;
 }
 
 // ( cramped )
-static void cramped_push(varicode varicode) {
-    int overflow = varicode.bit_count - encoder.bits_free;
+static inline void cramped_push(varicode varicode) {
+    unsigned char overflow = varicode.bit_count - encoder.bits_free;
     
     encoder.buffer[encoder.index] |= varicode.encoded_bits >> overflow;
-    swap_bytes(&encoder.buffer[encoder.index]); // Flip endianness for transmission.
+    encoder.buffer[encoder.index] = swap_bytes(encoder.buffer[encoder.index]); // Flip endianness for transmission.
     encoder.buffer[++encoder.index] = varicode.encoded_bits << (16 - overflow); // Write the overflowed bits to the next index.
 
     // Keep track of how much space is left in this new 'encoder.buffer[encoder.index]'
@@ -39,19 +40,20 @@ void encoder_start(unsigned char *buffer) {
 
 // ( vacant|cramped ) -- push --> ( vacant|cramped )
 void encoder_push(char ascii) {
-    if ((unsigned char)ascii > 127) return; // Invalid ASCII character, ignore it.
+    unsigned char _ascii = (unsigned char)ascii;
+    if (_ascii > 127) return; // Invalid ASCII character, ignore it.
 
-    varicode varicode = varicode_table[ascii];
+    const varicode* varicode = &varicode_table[_ascii];
 
-    if (encoder.bits_free < varicode.bit_count) { // Is there enough space at the current buffer position?
-        cramped_push(varicode); // No.
+    if (encoder.bits_free < varicode->bit_count) { // Is there enough space at the current buffer position?
+        cramped_push(*varicode); // No.
     } else {
-        vacant_push(varicode);  // Yes.
+        vacant_push(*varicode);  // Yes.
     }
 }
 
 // ( vacant|cramped ) -- done -->o
 int encoder_done(void) {
-    swap_bytes(&encoder.buffer[encoder.index]); // Flip the last encoded word.
+    encoder.buffer[encoder.index] = swap_bytes(encoder.buffer[encoder.index]); // Flip the last encoded word.
     return (encoder.index + 1) * 2; // Return the length of the stream in bytes.
 }

@@ -7,7 +7,10 @@ static struct {
     ascii_callback emit;
 } decoder;
 
-static void process_bit(unsigned char bit) {
+// Sparse reverse lookup table: Varicode index to ASCII character.
+static char ascii_table[LARGEST_VALID_VARICODE + 1];
+
+static inline void process_bit(unsigned char bit) {
     if(bit) { // 1
         decoder.varicode <<= decoder.zero_shift;
         decoder.varicode |= 1;
@@ -20,6 +23,7 @@ static void process_bit(unsigned char bit) {
             decoder.emit(ascii_table[decoder.varicode]);
         }
         decoder.varicode = 0;
+        decoder.zero_shift = 2;
     }
 }
 
@@ -33,10 +37,10 @@ void decoder_init(ascii_callback callback) {
         ascii_table[i] = ' ';
     }
 
-    // Unpack 'ascii_table_packed' into 'ascii_table'.
+    // Unpack 'varicode_table' into 'ascii_table'.
     for (int i = 0; i < 128; i++) {
-        varicode_ascii packed = ascii_table_packed[i];
-        ascii_table[packed.varicode] = packed.ascii;
+        unsigned short encoded_bits = varicode_table[i].encoded_bits;
+        ascii_table[encoded_bits] = (char)i;
     }
 }
 

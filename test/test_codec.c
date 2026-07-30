@@ -4,6 +4,10 @@
 #include "../varicode.h"
 #include "test.h"
 
+// Hello World
+//     H        e       l        l       o     -        W         o       r        l        d
+// 101010101 00 11 00 11011 00 11011 00 111 00 1 00 101011101 00 111 00 10101 00 11011 00 101101
+
 // Test state
 static struct {
     char decoded[256];
@@ -295,8 +299,53 @@ static void test_tab_character(void) {
     ASSERT(test_state.decoded[2] == 'b', "Third character should be 'b'");
 }
 
+// Test: Encoder initialization
+static void test_encoder_init(void) {
+    unsigned short buffer[8];
+    memset(buffer, 0xFF, sizeof(buffer)); // "Dirty" buffer
+    
+    encoder_start((unsigned char*)buffer);
+    
+    ASSERT(buffer[0] == 0, "First buffer element should be initialized to 0");
+}
+
+// Test: Invalid ASCII (>127) should be ignored
+static void test_invalid_ascii(void) {
+    test_state.decoded_count = 0;
+    decoder_init(test_callback);
+    
+    unsigned char encoded_buffer[256];
+    encoder_start(encoded_buffer);
+    
+    encoder_push('a');
+    encoder_push((char)200); // Invalid ASCII, should be ignored
+    encoder_push('b');
+    int stream_length = encoder_done();
+    
+    for (int i = 0; i < stream_length; i++) {
+        decoder_push(encoded_buffer[i]);
+    }
+    
+    ASSERT(test_state.decoded_count == 2, "Only two valid characters should be decoded");
+    ASSERT(test_state.decoded[0] == 'a', "First character should be 'a'");
+    ASSERT(test_state.decoded[1] == 'b', "Second character should be 'b'");
+}
+
+// Test: Encoder done returns byte count
+static void test_encoder_done_returns_bytes(void) {
+    unsigned short buffer[8];
+    encoder_start((unsigned char*)buffer);
+    
+    encoder_push('H');
+    encoder_push('i');
+    int bytes = encoder_done();
+    
+    ASSERT(bytes > 0, "Encoder done should return positive byte count");
+    ASSERT(bytes % 2 == 0, "Byte count should be even (multiples of 2)");
+}
+
 int main(void) {
-    printf("PSK31 Decoder Unit Tests\n");
+    printf("PSK31 Codec Unit Tests\n");
     printf("========================\n\n");
     
     test_single_char_space();
@@ -334,6 +383,15 @@ int main(void) {
     
     test_tab_character();
     printf("✓ Tab character\n");
+    
+    test_encoder_init();
+    printf("✓ Encoder initialization\n");
+    
+    test_invalid_ascii();
+    printf("✓ Invalid ASCII handling\n");
+    
+    test_encoder_done_returns_bytes();
+    printf("✓ Encoder done returns byte count\n");
     
     printf("\n✓ All tests passed!\n");
     return 0;
