@@ -8,8 +8,8 @@ static struct {
     signed char bits_free;
 } encoder;
 
-static inline void swap_bytes(unsigned short *word) {
-    *word = (*word << 8) | (*word >> 8);
+static inline unsigned short swap_bytes(unsigned short val) {
+    return (val << 8) | (val >> 8);
 }
 
 // ( vacant )
@@ -23,7 +23,7 @@ static inline void cramped_push(varicode varicode) {
     unsigned char overflow = varicode.bit_count - encoder.bits_free;
     
     encoder.buffer[encoder.index] |= varicode.encoded_bits >> overflow;
-    swap_bytes(&encoder.buffer[encoder.index]); // Flip endianness for transmission.
+    encoder.buffer[encoder.index] = swap_bytes(encoder.buffer[encoder.index]); // Flip endianness for transmission.
     encoder.buffer[++encoder.index] = varicode.encoded_bits << (16 - overflow); // Write the overflowed bits to the next index.
 
     // Keep track of how much space is left in this new 'encoder.buffer[encoder.index]'
@@ -53,6 +53,6 @@ void encoder_push(char ascii) {
 
 // ( vacant|cramped ) -- done -->o
 int encoder_done(void) {
-    swap_bytes(&encoder.buffer[encoder.index]); // Flip the last encoded word.
+    encoder.buffer[encoder.index] = swap_bytes(encoder.buffer[encoder.index]); // Flip the last encoded word.
     return (encoder.index + 1) * 2; // Return the length of the stream in bytes.
 }
