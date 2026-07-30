@@ -1,5 +1,5 @@
-#define PSK31_ENCODER
 #include "psk31.h"
+#define PSK31_VARICODE_TABLE
 #include "varicode.h"
 
 static struct {

@@ -1,4 +1,3 @@
-#define PSK31_DECODER
 #include "psk31.h"
 #include "varicode.h"
 
@@ -11,7 +10,7 @@ static struct {
 // Sparse reverse lookup table: Varicode index to ASCII character.
 static char ascii_table[LARGEST_VALID_VARICODE + 1];
 
-static void process_bit(unsigned char bit) {
+static inline void process_bit(unsigned char bit) {
     if(bit) { // 1
         decoder.varicode <<= decoder.zero_shift;
         decoder.varicode |= 1;
@@ -38,10 +37,10 @@ void decoder_init(ascii_callback callback) {
         ascii_table[i] = ' ';
     }
 
-    // Unpack 'ascii_table_packed' into 'ascii_table'.
+    // Unpack 'varicode_table' into 'ascii_table'.
     for (int i = 0; i < 128; i++) {
-        varicode_ascii packed = ascii_table_packed[i];
-        ascii_table[packed.varicode] = packed.ascii;
+        unsigned short encoded_bits = varicode_table[i].encoded_bits;
+        ascii_table[encoded_bits] = (char)i;
     }
 }
 
