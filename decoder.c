@@ -24,6 +24,7 @@ static void process_bit(unsigned char bit) {
             decoder.emit(ascii_table[decoder.varicode]);
         }
         decoder.varicode = 0;
+        decoder.zero_shift = 2;
     }
 }
 
