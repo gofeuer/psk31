@@ -40,14 +40,15 @@ void encoder_start(unsigned char *buffer) {
 
 // ( vacant|cramped ) -- push --> ( vacant|cramped )
 void encoder_push(char ascii) {
-    if ((unsigned char)ascii > 127) return; // Invalid ASCII character, ignore it.
+    unsigned char _ascii = (unsigned char)ascii;
+    if (_ascii > 127) return; // Invalid ASCII character, ignore it.
 
-    varicode varicode = varicode_table[ascii];
+    const varicode* varicode = &varicode_table[_ascii];
 
-    if (encoder.bits_free < varicode.bit_count) { // Is there enough space at the current buffer position?
-        cramped_push(varicode); // No.
+    if (encoder.bits_free < varicode->bit_count) { // Is there enough space at the current buffer position?
+        cramped_push(*varicode); // No.
     } else {
-        vacant_push(varicode);  // Yes.
+        vacant_push(*varicode);  // Yes.
     }
 }
 
