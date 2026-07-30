@@ -4,8 +4,8 @@
 
 static struct {
     unsigned short *buffer;
-    int index;
-    int bits_free;
+    unsigned int index;
+    signed char bits_free;
 } encoder;
 
 static inline void swap_bytes(unsigned short *word) {
@@ -13,14 +13,14 @@ static inline void swap_bytes(unsigned short *word) {
 }
 
 // ( vacant )
-static void vacant_push(varicode varicode) {
+static inline void vacant_push(varicode varicode) {
     encoder.buffer[encoder.index] |= varicode.encoded_bits << (encoder.bits_free - varicode.bit_count);
     encoder.bits_free -= varicode.bit_count + VARICODE_LETTER_GAP;
 }
 
 // ( cramped )
-static void cramped_push(varicode varicode) {
-    int overflow = varicode.bit_count - encoder.bits_free;
+static inline void cramped_push(varicode varicode) {
+    unsigned char overflow = varicode.bit_count - encoder.bits_free;
     
     encoder.buffer[encoder.index] |= varicode.encoded_bits >> overflow;
     swap_bytes(&encoder.buffer[encoder.index]); // Flip endianness for transmission.

@@ -4,7 +4,7 @@
 #define VARICODE_LETTER_GAP 2 // 00
 
 typedef struct {
-    int bit_count;
+    unsigned char bit_count;
     unsigned short encoded_bits;
 } varicode;
 
