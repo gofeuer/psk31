@@ -38,9 +38,9 @@ void decoder_init(ascii_callback callback) {
     }
 
     // Unpack 'varicode_table' into 'ascii_table'.
-    for (int i = 0; i < 128; i++) {
-        unsigned short encoded_bits = varicode_table[i].encoded_bits;
-        ascii_table[encoded_bits] = (char)i;
+    for (unsigned char ascii = 0; ascii < 128; ascii++) {
+        unsigned short encoded_bits = varicode_table[ascii].encoded_bits;
+        ascii_table[encoded_bits] = ascii;
     }
 }
 
