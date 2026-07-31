@@ -13,18 +13,20 @@ static inline unsigned short swap_bytes(unsigned short val) {
 }
 
 // ( vacant )
-static inline void vacant_push(varicode varicode) {
-    encoder.buffer[encoder.index] |= varicode.encoded_bits << (encoder.bits_free - varicode.bit_count);
-    encoder.bits_free -= varicode.bit_count + VARICODE_LETTER_GAP;
+static inline void vacant_push(unsigned short encoded_bits) {
+    unsigned char bit_count = get_bit_count(encoded_bits);
+    encoder.buffer[encoder.index] |= encoded_bits << (encoder.bits_free - bit_count);
+    encoder.bits_free -= bit_count + VARICODE_LETTER_GAP;
 }
 
 // ( cramped )
-static inline void cramped_push(varicode varicode) {
-    unsigned char overflow = varicode.bit_count - encoder.bits_free;
+static inline void cramped_push(unsigned short encoded_bits) {
+    unsigned char bit_count = get_bit_count(encoded_bits);
+    unsigned char overflow = bit_count - encoder.bits_free;
     
-    encoder.buffer[encoder.index] |= varicode.encoded_bits >> overflow;
+    encoder.buffer[encoder.index] |= encoded_bits >> overflow;
     encoder.buffer[encoder.index] = swap_bytes(encoder.buffer[encoder.index]); // Flip endianness for transmission.
-    encoder.buffer[++encoder.index] = varicode.encoded_bits << (16 - overflow); // Write the overflowed bits to the next index.
+    encoder.buffer[++encoder.index] = encoded_bits << (16 - overflow); // Write the overflowed bits to the next index.
 
     // Keep track of how much space is left in this new 'encoder.buffer[encoder.index]'
     encoder.bits_free = (16 - overflow) - VARICODE_LETTER_GAP;
@@ -40,15 +42,15 @@ void encoder_start(unsigned char *buffer) {
 
 // ( vacant|cramped ) -- push --> ( vacant|cramped )
 void encoder_push(char ascii) {
-    unsigned char _ascii = (unsigned char)ascii;
-    if (_ascii > 127) return; // Invalid ASCII character, ignore it.
+    unsigned char ascii_char = (unsigned char)ascii;
+    if (ascii_char > 127) return; // Invalid ASCII character, ignore it.
 
-    const varicode* varicode = &varicode_table[_ascii];
+    unsigned short encoded_bits = varicode_table[ascii_char];
 
-    if (encoder.bits_free < varicode->bit_count) { // Is there enough space at the current buffer position?
-        cramped_push(*varicode); // No.
+    if (encoder.bits_free < get_bit_count(encoded_bits)) { // Is there enough space at the current buffer position?
+        cramped_push(encoded_bits); // No.
     } else {
-        vacant_push(*varicode);  // Yes.
+        vacant_push(encoded_bits);  // Yes.
     }
 }
 
