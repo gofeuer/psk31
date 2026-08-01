@@ -19,7 +19,7 @@ static inline void process_bit(unsigned char bit) {
     if (decoder.varicode == 0) return;
 
     if (++decoder.zero_shift == 2) { // 00 gap   
-        for (unsigned char ascii_char = 0; ascii_char < 128; ascii_char++) {
+        for (int ascii_char = 127; ascii_char >= 0; ascii_char--) {
             if (varicode_table[ascii_char] == decoder.varicode) {
                 decoder.emit(ascii_char);
                 break;
