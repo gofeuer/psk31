@@ -13,15 +13,13 @@ static inline unsigned short swap_bytes(unsigned short val) {
 }
 
 // ( vacant )
-static inline void vacant_push(unsigned short encoded_bits) {
-    unsigned char bit_count = get_bit_count(encoded_bits);
+static inline void vacant_push(unsigned char bit_count, unsigned short encoded_bits) {
     encoder.buffer[encoder.index] |= encoded_bits << (encoder.bits_free - bit_count);
     encoder.bits_free -= bit_count + VARICODE_LETTER_GAP;
 }
 
 // ( cramped )
-static inline void cramped_push(unsigned short encoded_bits) {
-    unsigned char bit_count = get_bit_count(encoded_bits);
+static inline void cramped_push(unsigned char bit_count, unsigned short encoded_bits) {
     unsigned char overflow = bit_count - encoder.bits_free;
     
     encoder.buffer[encoder.index] |= encoded_bits >> overflow;
@@ -46,11 +44,12 @@ void encoder_push(char ascii) {
     if (ascii_char > 127) return; // Invalid ASCII character, ignore it.
 
     unsigned short encoded_bits = varicode_table[ascii_char];
+    unsigned char bit_count = get_bit_count(encoded_bits);
 
-    if (encoder.bits_free < get_bit_count(encoded_bits)) { // Is there enough space at the current buffer position?
-        cramped_push(encoded_bits); // No.
+    if (encoder.bits_free < bit_count) { // Is there enough space at the current buffer position?
+        cramped_push(bit_count, encoded_bits); // No.
     } else {
-        vacant_push(encoded_bits);  // Yes.
+        vacant_push(bit_count, encoded_bits); // Yes.
     }
 }
 
